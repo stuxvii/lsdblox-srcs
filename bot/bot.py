@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import discord
 from discord.ext import commands
+from discord.utils import get
 import os
 from dotenv import load_dotenv
 import mariadb
@@ -20,21 +21,21 @@ def keygenfunc(length):
 	return random_key
 
 def getrandomgranddad():
-    try:
-        with open(filepath, 'r') as file:
-            lines = file.readlines()
-        if not lines:
-            return f"Error: The file '{filepath}' is empty."
-        num_lines = len(lines)
-        random_index = random.randint(0, num_lines - 1)
-        random_line = lines[random_index].strip()
-        line_number = random_index + 1
-        return random_line
+	try:
+		with open(filepath, 'r') as file:
+			lines = file.readlines()
+		if not lines:
+			return f"Error: The file '{filepath}' is empty."
+		num_lines = len(lines)
+		random_index = random.randint(0, num_lines - 1)
+		random_line = lines[random_index].strip()
+		line_number = random_index + 1
+		return random_line
 
-    except FileNotFoundError:
-        return f"Error: The file '{filepath}' was not found."
-    except Exception as e:
-        return f"An unexpected error occurred: {e}"
+	except FileNotFoundError:
+		return f"Error: The file '{filepath}' was not found."
+	except Exception as e:
+		return f"An unexpected error occurred: {e}"
 
 def well_fuck_me_____with_a___():
 	uncountablenouns = {"soap","shampoo","toothpaste","sand","water","soil","grass","bread","cheese","milk","butter","sugar","salt","flour","chocolate"}
@@ -94,13 +95,14 @@ async def on_ready():
 	await client.change_presence(activity=discord.CustomActivity(name='Send "lsd-help" for a list of commands!'))
 
 @client.command(name='key')
-@commands.has_role("Moderator")
-async def key(ctx, user: discord.Member):
+@commands.has_role("Unregistered")
+async def key(ctx):
+	user = ctx.author
 	user_id = user.id
 	cur.execute("SELECT discordid FROM users WHERE discordid = ?", (user_id,))
 	existing_user = cur.fetchone()
 	if existing_user:
-		await ctx.send("User already has a key.")
+		await ctx.send("You already have a key, silly!")
 		return
 	user = await client.fetch_user(user_id)
 	if user:
@@ -114,7 +116,7 @@ async def key(ctx, user: discord.Member):
 			conn.commit()
 			await user.send(key)
 		except discord.Forbidden:
-			await ctx.send("This member has DMs disabled!, so " + "<@" + user_id + ">" + ", please enable them so I can send you your key.")
+			await ctx.send("Please enable your dms so I can send you your key.")
 			return
 	else:
 		ctx.send("User not found!")
@@ -124,6 +126,32 @@ async def key(ctx, user: discord.Member):
 async def stat(ctx, *, stat):
 	await ctx.send("Status changed to " + stat)
 	await client.change_presence(activity=discord.CustomActivity(name=stat))
+
+@client.command(name='nmw')
+@commands.has_role("Moderator")
+async def nmw(ctx, member: discord.Member):
+	guild = ctx.guild
+	role = get(guild.roles, name="Watchlist")
+	await member.remove_roles(role)
+	embed = discord.Embed(
+		description=f"{member.mention} was pardoned.",
+		title="Please behave",
+		color=discord.Color.green()
+	)
+	await ctx.send(embed=embed)
+
+@client.command(name='wtc')
+@commands.has_role("Moderator")
+async def wtc(ctx, member: discord.Member):
+	guild = ctx.guild
+	role = get(guild.roles, name="Watchlist")
+	await member.add_roles(role)
+	embed = discord.Embed(
+		description=f"⚠️ {member.mention} has been added to the staff watchlist.",
+		title="Please behave",
+		color=discord.Color.red()
+	)
+	await ctx.send(embed=embed)
 
 @client.command(name='resetpass')
 @commands.has_role("Registered")
@@ -146,7 +174,7 @@ async def key(ctx):
 	validpass = False
 	while not validpass:
 		try:
-			newpasswordmsg = await client.wait_for('message', check=checkpass, timeout=60.0)
+			newpasswordmsg = await client.wait_for('message', check=checkpass, timeout=300.0)
 			newpassword = newpasswordmsg.content.strip()
 			if len(newpassword) < 15:
 				await dm.send(f"Your password is not long enough, please try again. (15 chars minimum length)")
@@ -169,7 +197,7 @@ async def key(ctx):
 			await dm.send(f"Your new password has been carefully recorded, please delete your previous message containing it for security.")
 
 		except asyncio.TimeoutError:
-			await dm.send("Password reset form timed out (60 seconds). Please run the command again if you want to continue.")
+			await dm.send("Password reset form timed out (300 seconds). Please run the command again if you want to continue.")
 			return
 
 @client.command(name='granddad7')
@@ -188,13 +216,17 @@ async def granddad7(ctx):
 async def commands(ctx):
 	user = ctx.author
 	await ctx.send(
-		"-- List of commands --\n"
+		"Thanks for using LSDBot! [Source code](https://github.com/stuxvii/lsdblox-srcs)\n"
+		"Global utility commands\n"
+		"`lsd-givkeypls` -- Sends you a key to register @ https://lsdblox.cc.\n"
 		"`lsd-resetpass` -- Password reset helper.\n"
 		"`lsd-granddad7` -- FLINTSTONES? Sends a random SiIvagunner high quality rip.\n"
 		"`lsd-wellfmewa` -- Say the line, bart! Sends a message with 'well fuck me' [modifier] 'with a/an' [object] \n"
 		"Moderator only commands:\n"
-		"`lsd-key @user` -- Sends a fellow member of the server a key so they can register.\n"
+		"`lsd-wtc @user` -- Places a member under \"Watchlist\" status, which restricts them from doing a lot of things (use if they sent something questionable) \n"
+		"`lsd-nmw @user` -- Removes member from the \"Watchlist\".\n"
 		"`lsd-stat text` -- Sets the status of the bot to whatever text.\n"
+		, suppress_embeds=True
 		)
 
 client.run(TOKEN)
