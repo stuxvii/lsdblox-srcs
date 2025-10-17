@@ -1,6 +1,8 @@
 # Fantasia (LSDBlox's launcher)
 
 How to get:
+<br>
+
 Method #1: Download the latest pre-built binary from the [releases](https://github.com/stuxvii/lsdblox-srcs/releases) page. (Faster)
 
 Method #2: Manually build Fantasia yourself. (Recommended)
