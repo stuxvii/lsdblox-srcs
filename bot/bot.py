@@ -8,6 +8,7 @@ import mariadb
 import sys
 import random
 import string
+import time
 import asyncio
 from argon2 import PasswordHasher
 
@@ -94,9 +95,9 @@ async def on_ready():
 	print(f'We have logged in as {client.user}')
 	await client.change_presence(activity=discord.CustomActivity(name='Send "lsd-help" for a list of commands!'))
 
-@client.command(name='key')
+@client.command(name='givkeypls')
 @commands.has_role("Unregistered")
-async def key(ctx):
+async def givkeypls(ctx):
 	user = ctx.author
 	user_id = user.id
 	cur.execute("SELECT discordid FROM users WHERE discordid = ?", (user_id,))
@@ -129,12 +130,13 @@ async def stat(ctx, *, stat):
 
 @client.command(name='nmw')
 @commands.has_role("Moderator")
-async def nmw(ctx, member: discord.Member):
+async def nmw(ctx, discmember: discord.Member):
 	guild = ctx.guild
-	role = get(guild.roles, name="Watchlist")
-	await member.remove_roles(role)
+	role = get(guild.roles, name="Watch-list")
+	time.sleep(1)
+	await discmember.remove_roles(role)
 	embed = discord.Embed(
-		description=f"{member.mention} was pardoned.",
+		description=f"{discmember.mention} was pardoned.",
 		title="Please behave",
 		color=discord.Color.green()
 	)
@@ -142,12 +144,13 @@ async def nmw(ctx, member: discord.Member):
 
 @client.command(name='wtc')
 @commands.has_role("Moderator")
-async def wtc(ctx, member: discord.Member):
+async def wtc(ctx, discmember: discord.Member):
 	guild = ctx.guild
-	role = get(guild.roles, name="Watchlist")
-	await member.add_roles(role)
+	role = get(guild.roles, name="Watch-list")
+	time.sleep(1)
+	await discmember.add_roles(role)
 	embed = discord.Embed(
-		description=f"⚠️ {member.mention} has been added to the staff watchlist.",
+		description=f"⚠️ {discmember.mention} has been added to the staff watchlist.",
 		title="Please behave",
 		color=discord.Color.red()
 	)
@@ -155,7 +158,7 @@ async def wtc(ctx, member: discord.Member):
 
 @client.command(name='resetpass')
 @commands.has_role("Registered")
-async def key(ctx):
+async def resetpass(ctx):
 	user = ctx.author
 	user_id = user.id
 
@@ -200,6 +203,44 @@ async def key(ctx):
 			await dm.send("Password reset form timed out (300 seconds). Please run the command again if you want to continue.")
 			return
 
+@client.command(name='get')
+@commands.has_role("Registered")
+async def get2(ctx, name):
+    cur.execute(
+        """
+        SELECT 
+            u.id, 
+            u.registerts, 
+            u.discordid, 
+            e.money, 
+            e.lastbuxclaim 
+        FROM users u 
+        LEFT JOIN economy e ON u.id = e.id 
+        WHERE u.username = ?
+        """,
+        (name,)
+    )
+    user_data = cur.fetchone()
+
+    if user_data:
+        userid, registerdate, discordid, money, lastlogin = user_data
+        try:
+            user = await ctx.bot.fetch_user(discordid) 
+        except:
+            await ctx.send(f"Found user '{name}' in DB, but couldn't fetch their Discord account.")
+            return
+        embed = discord.Embed(
+            description=f"**Discord tag:** {str(user)}\n**Money:** {money or 0}\n **Register date:** <t:{registerdate}:F>\n **Last login:** <t:{lastlogin}:F>",
+            title=f"{name}",
+            color=discord.Color.blue()
+        )
+        embed.set_thumbnail(url=user.avatar.url if user.avatar else user.default_avatar.url)
+        embed.set_image(url=f"https://lsdblox.cc/renders/{userid}.png")
+        
+        await ctx.send(embed=embed)
+    else:
+        await ctx.send("User not found.")
+
 @client.command(name='granddad7')
 @commands.has_role("Registered")
 async def granddad7(ctx):
@@ -217,8 +258,11 @@ async def commands(ctx):
 	user = ctx.author
 	await ctx.send(
 		"Thanks for using LSDBot! [Source code](https://github.com/stuxvii/lsdblox-srcs)\n"
+		"usrnm = Site username\n"
+		"@user = Server username\n"
 		"Global utility commands\n"
 		"`lsd-givkeypls` -- Sends you a key to register @ https://lsdblox.cc.\n"
+		"`lsd-get usrnm` -- Displays information about an LSDBlox member.\n"
 		"`lsd-resetpass` -- Password reset helper.\n"
 		"`lsd-granddad7` -- FLINTSTONES? Sends a random SiIvagunner high quality rip.\n"
 		"`lsd-wellfmewa` -- Say the line, bart! Sends a message with 'well fuck me' [modifier] 'with a/an' [object] \n"
