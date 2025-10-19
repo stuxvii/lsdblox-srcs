@@ -235,7 +235,7 @@ async def get2(ctx, name):
             color=discord.Color.blue()
         )
         embed.set_thumbnail(url=user.avatar.url if user.avatar else user.default_avatar.url)
-        embed.set_image(url=f"https://lsdblox.cc/renders/{userid}.png")
+        embed.set_image(url=f"https://lsdblox.cc/renders/{userid}.png?refreshcachethingy=" + str(random.randint(1,314159)))
         
         await ctx.send(embed=embed)
     else:
