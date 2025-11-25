@@ -27,4 +27,5 @@ That weird one we don't talk about:
 <br>
 <br>
 CREDITS:
+<br>
 Checkerboard image: Blender
