@@ -23,3 +23,8 @@ That weird one we don't talk about:
 <br>
 `asset_preview.exe model.obj [model.png]`
 <br>
+
+<br>
+<br>
+CREDITS:
+Checkerboard image: Blender
