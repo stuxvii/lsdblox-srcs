@@ -1,0 +1,1 @@
+hey this one is deprecated go to the main project at the lsd_thumbnail_server repo
