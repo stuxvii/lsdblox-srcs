@@ -39,10 +39,5 @@ Mouse wheel: Adjust zoom
 <br>
 <br>
 
-## Tips and tricks
-If your textures look wrong, even if they look fine in your 3D modeling software, try to flip the texture image horizontally with any image editing software. **UVs are parsed upside down for some reason, and any pull requests to fix this behaviour are welcome**.
-<br>
-<br>
-
 ## Credits
 Checkerboard image: Blender
