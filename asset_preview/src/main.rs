@@ -15,7 +15,7 @@ fn process_mesh(mesh: &tobj::Mesh, texture: &Texture2D) -> Mesh {
     let texcoords: Vec<Vec2> = mesh
         .texcoords
         .chunks(2)
-        .map(|x| Vec2::new(x[0], x[1]))
+        .map(|x| Vec2::new(x[0], 1.0 - x[1]))
         .collect();
 
     let normals: Vec<Vec3> = mesh
@@ -86,6 +86,7 @@ fn program_conf() -> macroquad::conf::Conf {
         miniquad_conf: window_conf(),
         draw_call_vertex_capacity: 100000,
         draw_call_index_capacity: 50000,
+        default_filter_mode: FilterMode::Nearest,
         ..Default::default()
     }
 }
@@ -128,8 +129,6 @@ async fn main() {
         println!("Processing texture...");
         let img_path = Path::new(&args[2]);
         if img_path.exists() {
-
-            //let (width, height, bytes) = 
             match process_img(img_path) {
                 Ok(e) => {
                     let (width, height, bytes) = e;
